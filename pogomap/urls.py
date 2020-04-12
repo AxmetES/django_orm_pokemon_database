@@ -11,6 +11,5 @@ urlpatterns = [
     path('pokemon/<pokemon_id>/', views.show_pokemon, name="pokemon"),
 ]
 
-
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,27 +1,34 @@
+import datetime
+
 from django.db import models
 
 
 class Pokemon(models.Model):
-    id = models.AutoField(auto_created=True, primary_key=True)
-    title_ru = models.CharField(max_length=200, default=True)
-    title_en = models.CharField(max_length=200, default=True)
-    title_jp = models.CharField(max_length=200, default=True)
-    image = models.URLField()
-    appeared_at = models.DateTimeField(null=True)
-    disappeared_at = models.DateTimeField(null=True)
-    level = models.IntegerField(default=True)
-    health = models.IntegerField(default=True)
-    attack = models.IntegerField(default=True)
-    defence = models.IntegerField(default=True)
-    stamina = models.IntegerField(default=True)
-    description = models.TextField(blank=True, null=True)
-    parent_id = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    """Покемон"""
+    title_ru = models.CharField(max_length=200, default='Default title', blank=True, verbose_name='название рус.')
+    title_en = models.CharField(max_length=200, default='Default title', blank=True, verbose_name='название анл.')
+    title_jp = models.CharField(max_length=200, default='Default title', blank=True, verbose_name='название япн.')
+    image = models.URLField(verbose_name='изображение', blank=True)
+    description = models.TextField(blank=True, verbose_name='описание')
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='parents',
+                               verbose_name='эволюция')
 
     def __str__(self):
-        return f'Pokemon {self.title_ru}, {self.title_en}, {self.title_jp}'
+        return f'Pokemon {self.title_ru}'
 
 
 class PokemonEntity(models.Model):
-    lat = models.FloatField(null=True)
-    lon = models.FloatField(null=True)
-    pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE)
+    """Особь"""
+    lat = models.FloatField(verbose_name='широта')
+    lon = models.FloatField(verbose_name='долгота')
+
+    appeared_at = models.DateTimeField(null=True, blank=True, verbose_name='появился в')
+    disappeared_at = models.DateTimeField(null=True, blank=True, verbose_name='исчез в')
+
+    level = models.IntegerField(null=True, verbose_name='уровень')
+    health = models.IntegerField(null=True, verbose_name='здоровье')
+    attack = models.IntegerField(null=True, verbose_name='атака')
+    defence = models.IntegerField(null=True, verbose_name='защита')
+    stamina = models.IntegerField(null=True, verbose_name='выносливость')
+
+    pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE, verbose_name='связи')

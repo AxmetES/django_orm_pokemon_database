@@ -1,5 +1,4 @@
 import folium
-import json
 
 from django.http import HttpResponseNotFound
 from django.shortcuts import render
@@ -25,8 +24,7 @@ def show_all_pokemons(request):
     pokemons = Pokemon.objects.all()
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     for pokemon in pokemons:
-        id = pokemon.id
-        pokemon_entity = PokemonEntity.objects.filter(pokemon__id__contains=id)
+        pokemon_entity = PokemonEntity.objects.filter(pokemon__id=pokemon.id)
         for entity in pokemon_entity:
             add_pokemon(
                 folium_map, entity.lat, entity.lon,
@@ -47,42 +45,44 @@ def show_all_pokemons(request):
 
 
 def show_pokemon(request, pokemon_id):
-    pokemons = Pokemon.objects.all()
+    try:
+        pokemon = Pokemon.objects.get(id=pokemon_id)
 
-    for pokemon in pokemons:
-        if pokemon.id == int(pokemon_id):
-            print(pokemon.title_ru)
-            requested_pokemon = PokemonEntity.objects.filter(pokemon__id=pokemon_id)
-            parent = Pokemon.objects.get(pokemon__id=pokemon.parent_id)
-            pokemons_info = {
-                "pokemon_id": pokemon.id,
-                "title_ru": pokemon.title_ru,
-                "title_en": pokemon.title_en,
-                "title_jp": pokemon.title_jp,
-                "description": pokemon.description,
-                "img_url": pokemon.image,
-                'parent':pokemon.parent_id,
-                "previous_evolution": {
-                    "title_ru": parent.title_ru,
-                    "pokemon_id": parent.id,
-                    "img_url": parent.image,
-                }
-            }
-            break
-    else:
+    except:
         return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
+
+    kids = pokemon.parents.all()
+    requested_pokemon = PokemonEntity.objects.filter(pokemon__id=pokemon.id)
+    pokemons_info = {
+        "pokemon_id": pokemon.id,
+        "title_ru": pokemon.title_ru,
+        "title_en": pokemon.title_en,
+        "title_jp": pokemon.title_jp,
+        "description": pokemon.description,
+        "img_url": pokemon.image,
+        'previous_evolution': {},
+        'next_evolution': {}
+    }
+    if pokemon.parent is not None:
+        print('parent')
+        pokemons_info['previous_evolution'] = {
+            "title_ru": pokemon.parent.title_ru,
+            "pokemon_id": pokemon.parent.id,
+            "img_url": pokemon.parent.image,
+        }
+    if kids.exists():
+        print('kid')
+        pokemons_info['next_evolution'] = {
+            "title_ru": kids[0].title_ru,
+            "pokemon_id": kids[0].id,
+            "img_url": kids[0].image,
+        }
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     for pokemon_entity in requested_pokemon:
         add_pokemon(
             folium_map, pokemon_entity.lat, pokemon_entity.lon,
             pokemon.title_ru, pokemon.image)
-
-    print(pokemons_info["pokemon_id"])
-    print(pokemons_info["title_ru"])
-    print(pokemons_info["title_en"])
-    print(pokemons_info["title_jp"])
-    print(pokemons_info["parent"])
 
     return render(request, "pokemon.html", context={'map': folium_map._repr_html_(),
                                                     'pokemon': pokemons_info})
