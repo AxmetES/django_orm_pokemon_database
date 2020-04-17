@@ -53,7 +53,7 @@ def show_pokemon(request, pokemon_id):
 
     kids = pokemon.parents.all()
     requested_pokemon = PokemonEntity.objects.filter(pokemon__id=pokemon.id)
-    pokemons_info = {
+    pokemons_on_page = {
         "pokemon_id": pokemon.id,
         "title_ru": pokemon.title_ru,
         "title_en": pokemon.title_en,
@@ -65,14 +65,13 @@ def show_pokemon(request, pokemon_id):
     }
     if pokemon.parent is not None:
         print('parent')
-        pokemons_info['previous_evolution'] = {
+        pokemons_on_page['previous_evolution'] = {
             "title_ru": pokemon.parent.title_ru,
             "pokemon_id": pokemon.parent.id,
             "img_url": pokemon.parent.image,
         }
     if kids.exists():
-        print('kid')
-        pokemons_info['next_evolution'] = {
+        pokemons_on_page['next_evolution'] = {
             "title_ru": kids[0].title_ru,
             "pokemon_id": kids[0].id,
             "img_url": kids[0].image,
@@ -85,4 +84,4 @@ def show_pokemon(request, pokemon_id):
             pokemon.title_ru, pokemon.image)
 
     return render(request, "pokemon.html", context={'map': folium_map._repr_html_(),
-                                                    'pokemon': pokemons_info})
+                                                    'pokemon': pokemons_on_page})
