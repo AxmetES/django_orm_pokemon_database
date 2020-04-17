@@ -24,8 +24,8 @@ def show_all_pokemons(request):
     pokemons = Pokemon.objects.all()
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     for pokemon in pokemons:
-        pokemon_entity = PokemonEntity.objects.filter(pokemon__id=pokemon.id)
-        for entity in pokemon_entity:
+        pokemon_entities = pokemon.entities.all()
+        for entity in pokemon_entities:
             add_pokemon(
                 folium_map, entity.lat, entity.lon,
                 pokemon.title_ru, pokemon.image)
@@ -47,12 +47,11 @@ def show_all_pokemons(request):
 def show_pokemon(request, pokemon_id):
     try:
         pokemon = Pokemon.objects.get(id=pokemon_id)
-
     except:
         return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
 
-    kids = pokemon.parents.all()
-    requested_pokemon = PokemonEntity.objects.filter(pokemon__id=pokemon.id)
+    kids = pokemon.kids.first()
+    requested_pokemon = pokemon.entities.all()
     pokemons_on_page = {
         "pokemon_id": pokemon.id,
         "title_ru": pokemon.title_ru,
@@ -63,18 +62,17 @@ def show_pokemon(request, pokemon_id):
         'previous_evolution': {},
         'next_evolution': {}
     }
-    if pokemon.parent is not None:
-        print('parent')
+    if pokemon.parent:
         pokemons_on_page['previous_evolution'] = {
             "title_ru": pokemon.parent.title_ru,
             "pokemon_id": pokemon.parent.id,
             "img_url": pokemon.parent.image,
         }
-    if kids.exists():
+    if kids:
         pokemons_on_page['next_evolution'] = {
-            "title_ru": kids[0].title_ru,
-            "pokemon_id": kids[0].id,
-            "img_url": kids[0].image,
+            "title_ru": kids.title_ru,
+            "pokemon_id": kids.id,
+            "img_url": kids.image,
         }
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)

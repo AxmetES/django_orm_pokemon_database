@@ -4,13 +4,13 @@ from django.db import models
 
 
 class Pokemon(models.Model):
-    """Покемон"""
-    title_ru = models.CharField(max_length=200, default='Default title', blank=True, verbose_name='название рус.')
-    title_en = models.CharField(max_length=200, default='Default title', blank=True, verbose_name='название анл.')
-    title_jp = models.CharField(max_length=200, default='Default title', blank=True, verbose_name='название япн.')
+    """Покемон."""
+    title_ru = models.CharField(max_length=200, blank=True, verbose_name='название рус.')
+    title_en = models.CharField(max_length=200, blank=True, verbose_name='название анл.')
+    title_jp = models.CharField(max_length=200, blank=True, verbose_name='название япн.')
     image = models.URLField(verbose_name='изображение', blank=True)
     description = models.TextField(blank=True, verbose_name='описание')
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='parents',
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='kids',
                                verbose_name='эволюция')
 
     def __str__(self):
@@ -18,7 +18,7 @@ class Pokemon(models.Model):
 
 
 class PokemonEntity(models.Model):
-    """Особь"""
+    """Особь."""
     lat = models.FloatField(verbose_name='широта')
     lon = models.FloatField(verbose_name='долгота')
 
@@ -31,4 +31,4 @@ class PokemonEntity(models.Model):
     defence = models.IntegerField(null=True, blank=True, verbose_name='защита')
     stamina = models.IntegerField(null=True, blank=True, verbose_name='выносливость')
 
-    pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE, verbose_name='связи')
+    pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE, related_name='entities', verbose_name='связи')

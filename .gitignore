@@ -88,3 +88,6 @@ local_settings.py
 .env
 db.sqlite3
 media/
+/.idea
+/venv
+pokemon_entities/pokemons.json
