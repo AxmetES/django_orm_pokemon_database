@@ -50,7 +50,7 @@ def show_pokemon(request, pokemon_id):
     except:
         return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
 
-    kids = pokemon.kids.first()
+    kid = pokemon.kids.first()
     requested_pokemon = pokemon.entities.all()
     pokemons_on_page = {
         "pokemon_id": pokemon.id,
@@ -68,11 +68,11 @@ def show_pokemon(request, pokemon_id):
             "pokemon_id": pokemon.parent.id,
             "img_url": pokemon.parent.image,
         }
-    if kids:
+    if kid:
         pokemons_on_page['next_evolution'] = {
-            "title_ru": kids.title_ru,
-            "pokemon_id": kids.id,
-            "img_url": kids.image,
+            "title_ru": kid.title_ru,
+            "pokemon_id": kid.id,
+            "img_url": kid.image,
         }
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
